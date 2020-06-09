@@ -32,15 +32,20 @@ class S3RemoteAssetStore
     {
         $config = CraftRemoteAssets::getInstance()->getSettings()->s3Config;
         try {
-            $this->getS3()->putObject(
-                [
-                    'Bucket' => $config['bucket'],
-                    'Key' => $config['root'] . '/' . $key,
-                    'SourceFile' => $local,
-                    'ContentType' => $contentType,
-                    'ACL' => 'public-read' //TODO: Check for private asset uploads
-                ]
-            );
+            $putConfig = [
+                'Bucket' => $config['bucket'],
+                'Key' => $config['root'] . '/' . $key,
+                'SourceFile' => $local,
+                'ContentType' => $contentType,
+            ];
+
+            // If using Cloudfront, don't add an ACL
+            $config = CraftRemoteAssets::getInstance()->getSettings()->s3Config;
+            if (empty($config['cloudfrontUrl'])) {
+                $putConfig['ACL'] = 'public-read';
+            }
+
+            $this->getS3()->putObject($putConfig);
         } catch (CException $e) {
             Craft::info($e->getMessage());
             return false;
