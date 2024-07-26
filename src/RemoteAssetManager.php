@@ -74,8 +74,12 @@ class RemoteAssetManager extends AssetManager
         return $this->currentRevision() . DIRECTORY_SEPARATOR . sprintf('%x', crc32($path));
     }
 
-    public function publish($path, $hashByName = false, $level = -1, $forceCopy = null, $assetsVersion = null)
+    public function publish($path, $options = []) : array
     {
+        $forceCopy = $options['forceCopy'] ?? null;
+        $assetsVersion = $options['assetsVersion'] ?? null;
+        $level = $options['level'] ?? -1;
+        $hashByName = $options['hashByName'] ?? false;
 
         $path = Yii::getAlias($path);
         $src = realpath($path);
